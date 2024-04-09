@@ -37,7 +37,41 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+        self.heapify_up(self.count);
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        if self.is_empty() {
+            return None;
+        }
+        let root = self.items.swap_remove(1);
+        self.count -= 1;
+        self.heapify_down(1);
+        Some(root)
+    }
+
+    fn heapify_up(&mut self, idx: usize) {
+        let parent_idx = self.parent_idx(idx);
+        if parent_idx == 0 {
+            return;
+        }
+        if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+            self.items.swap(idx, parent_idx);
+            self.heapify_up(parent_idx);
+        }
+    }
+
+    fn heapify_down(&mut self, idx: usize) {
+        if !self.children_present(idx) {
+            return;
+        }
+        let smallest_child_idx = self.smallest_child_idx(idx);
+        if (self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+            self.items.swap(smallest_child_idx, idx);
+            self.heapify_down(smallest_child_idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +91,13 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+		let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right > self.count || (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +123,10 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+		if self.is_empty() {
+            return None;
+        }
+        self.pop()
     }
 }
 
